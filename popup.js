@@ -66,13 +66,11 @@ const elements = {
   claudePrompt: document.getElementById('claude-prompt'),
   copyClaudeBtn: document.getElementById('copy-claude-btn'),
   modeBtns: document.querySelectorAll('.mode-btn'),
-  viewBtns: document.querySelectorAll('.view-btn'),
   toast: document.getElementById('toast')
 };
 
 // State
 let extractedColors = [];
-let currentView = 'grid';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -88,16 +86,6 @@ function setupEventListeners() {
       btn.classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(`${btn.dataset.mode}-section`).classList.add('active');
-    });
-  });
-
-  // View toggle
-  elements.viewBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      elements.viewBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentView = btn.dataset.view;
-      elements.paletteGrid.classList.toggle('list-view', currentView === 'list');
     });
   });
 
