@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaletteExtractor</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+          <path d="M2 12h20"/>
+        </svg>
+        <h1>PaletteExtractor</h1>
+      </div>
+      <p class="subtitle">Paste HTML/CSS to extract colors</p>
+    </header>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="paste">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        Paste Code
+      </button>
+      <button class="mode-btn" data-mode="capture">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Capture Page
+      </button>
+    </div>
+
+    <div id="paste-section" class="section active">
+      <div class="input-area">
+        <textarea 
+          id="code-input" 
+          placeholder="Paste HTML/CSS code here (Ctrl+U source, inline styles, CSS files...)&#10;&#10;Example:&#10;&lt;div style=&quot;color: #ff6b6b; background: rgb(255,255,255);&quot;&gt;&#10;  .class { color: hsl(200, 50%, 50%); }&#10;&lt;/div&gt;"
+          spellcheck="false"
+        ></textarea>
+        <div class="input-actions">
+          <button id="clear-btn" class="btn btn-secondary" title="Clear">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+          <button id="paste-btn" class="btn btn-secondary" title="Paste from clipboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button id="extract-btn" class="btn btn-primary btn-full">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Extract Palette
+      </button>
+    </div>
+
+    <div id="capture-section" class="section">
+      <div class="capture-info">
+        <p>Smart scan extracts <strong>meaningful palette colors</strong> — filtering out noise, duplicates, and near-grayscale tones.</p>
+      </div>
+      <button id="capture-btn" class="btn btn-primary btn-full">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Scan Current Page
+      </button>
+    </div>
+
+    <div id="results" class="results hidden">
+      <div class="results-header">
+        <div class="stats">
+          <span id="color-count">0 colors found</span>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid" title="Grid view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+          <button class="view-btn" data-view="list" title="List view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="palette-grid" class="palette-grid"></div>
+
+      <div class="palette-actions">
+        <button id="copy-css-btn" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 18H6a2 2 0 0 1-2-2V6"/>
+            <rect x="8" y="2" width="12" height="14" rx="2"/>
+          </svg>
+          Copy CSS
+        </button>
+        <button id="copy-json-btn" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="18"/>
+            <line x1="12" y1="14" x2="12" y2="14"/>
+          </svg>
+          Copy JSON
+        </button>
+        <button id="claude-btn" class="btn btn-accent">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.304 3.541l-4.302 12.049h-.02L8.659 3.541H4.509l6.39 16.913h4.203l6.388-16.913h-4.186zm-9.46 0H3.192v16.913h4.652V3.541zm11.797 0h-4.652v16.913h4.652V3.541z"/>
+          </svg>
+          Ask Claude
+        </button>
+      </div>
+
+      <div id="claude-section" class="claude-section hidden">
+        <div class="claude-prompt-box">
+          <p class="claude-label">Send to Claude for color refinement:</p>
+          <textarea id="claude-prompt" readonly></textarea>
+          <div class="claude-actions">
+            <button id="copy-claude-btn" class="btn btn-primary btn-small">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              Copy & Open Claude
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
